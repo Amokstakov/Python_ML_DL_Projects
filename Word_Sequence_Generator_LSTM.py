@@ -133,7 +133,7 @@ model.fit(x,y,batch_size=128,epochs=100)
 
 #save the model
 model.save('model_LSTM.h5')
-model = tf.keras.models.load_model('model_LSTM.h5')
+model = tf.keras.models.load_model('Word_Sequence_Generator_LSTM_Model.h5')
 
 
 ###Generate the text
