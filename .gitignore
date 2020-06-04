@@ -1,0 +1,9 @@
+data
+cnn_dataset.pkl
+WordEmbeddings/features.pkl
+WordEmbeddings/mapping.txt
+TextSummarization/cnn_dataset.pkl
+NeuralLanguageModel/tokenizer.pkl
+NeuralLanguageModel/model.h5
+NeuralLanguageModel/Plato_sequences.txt
+CharBasedNN/mapping.pkl

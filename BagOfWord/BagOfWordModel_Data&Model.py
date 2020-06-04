@@ -61,4 +61,18 @@ y_train = np.array([0 for _ in range(900)] + [1 for _ in range(900)])
 vocab_size = len(tokenizer.word_index) + 1
 
 def create_train_model(x,y,vocab_size, max_doc_len):
+    model = tf.keras.models.Sequential([
+        tf.keras.layers.Embedding(vocab_size, 100, input_length=max_doc_len),
+        tf.keras.layers.Conv1D(filters=32, kernel_size=8, activation="relu"),
+        tf.keras.layers.MaxPool1D(pool_size=2),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dense(10, activation="relu"),
+        tf.keras.layers.Dense(1, activation="sigmoid")
+    ])
+
+    model.compile(loss="binary_crossentropy", optimizer="adam", metrics=['accuracy'])
+    model.fit(x, y, epochs=10, verbose=2)
+    return model
+
+model = create_train_model(x_train, y_train, vocab_size, max_len)
 
