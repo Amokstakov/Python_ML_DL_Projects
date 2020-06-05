@@ -1,16 +1,19 @@
-import numpy as numpy
+import numpy as np
 import pickle
-import tensorflow as tf
-from tf.keras.callbacks import ModelCheckpoint
+import keras
+import sys
+#import tensorflow as tf
+from keras.callbacks import ModelCheckpoint
 
 ##layers
-from tf.keras.models import Model
-from tf.keras.layers import Input
-from tf.keras.layers import Dense
-from tf.keras.layers import LSTM
-from tf.keras.layers import Embedding
-from tf.keras.layers import Dropout
-from tf.keras.layers.merge import add
+from keras.models import Model
+from keras.layers import Input
+from keras.layers import Dense
+from keras.layers import LSTM
+from keras.layers import Embedding
+from keras.layers import Dropout
+from keras.preprocessing.text import Tokenizer
+from keras.layers.merge import add
 
 #load data
 def load_data(filename):
@@ -46,10 +49,12 @@ def load_clean_descriptions(filename, dataset):
 
 #load photo features
 def load_photo_features(filename, dataset):
-    print("um wtf")
+    print(filename)
+    #print(dataset)
     all_features = pickle.load(open(filename, 'rb'))
+    
     #filter features
-    features = {k: all_features[k] for k in dataset} 
+    features = {k: all_features[k] for k in dataset if len(k) >= 1} 
     return features
 
 #conver dict of clean descriptions to a list of descriptions
@@ -62,13 +67,14 @@ def to_lines(descriptions):
 #fit a tokenizer given caption descriptions
 def create_tokenizer(descriptions):
     all_desc = to_lines(descriptions)
-    tokenizer = tf.keras.preprocessing.text.Tokenizer()
+    tokenizer = Tokenizer()
     tokenizer.fit_on_texts(all_desc)
     return tokenizer
+    
 
 #calculate max len of vocab for embedding layer
 def max_len(descriptions):
-    all_desc = to_lines(descriptions):
+    all_desc = to_lines(descriptions)
     return max(len(d.split()) for d in all_desc)
 
 #create seqeucnes of images, input seqeucnes and output words for an image
@@ -79,29 +85,30 @@ def create_sequences(tokenizer, max_len, descriptions, photos, vocab_size):
         #walk through each description of the image
         for desc in desc_list:
             #encode the sequence
-            seq = tokenizer.texts_to_sequence([desc])[0]
+            seq = tokenizer.texts_to_sequences([desc])[0]
             for i in range(1, len(seq)):
                 in_seq, out_seq = seq[:i], seq[i]
-                in_seq = tf.keras.preprocessing.sequence.pad_sequences([in_seq], maxlen=max_len)[0]
-                out_seq = tf.keras.utils.to_categorical([out_seq], num_classes=vocab_size)[0]
+                in_seq = keras.preprocessing.sequence.pad_sequences([in_seq], maxlen=max_len)[0]
+                out_seq = keras.utils.to_categorical([out_seq], num_classes=vocab_size)[0]
                 #store
                 x1.append(photos[key][0])
                 x2.append(in_seq)
                 y.append(out_seq)
-    return array(x1), array(x2), array(y)
+    return np.array(x1), np.array(x2), np.array(y)
 
 def define_model(vocab_size, max_len):
+
     #feature Extraction Model
-    inputs1 = Input(shape=(4096,))
+    inputs1 = Input(shape=(1000,))
     fe1 = Dropout(0.5)(inputs1)
     fe2 = Dense(256, activation="relu")(fe1)
     #sequence model
-    inputs2 = Input(shape=(max_len))
+    inputs2 = Input(shape=(max_len,))
     se1 = Embedding(vocab_size, 256, mask_zero=True)(inputs2)
     se2 = Dropout(0.5)(se1)
     se3 = LSTM(256)(se2)
     #decoder model
-    de1 = add([fe1, se1])
+    de1 = add([fe2, se3])
     de2 = Dense(256, activation="relu")(de1)
     outputs = Dense(vocab_size, activation="softmax")(de2)
     model = Model(inputs=[inputs1, inputs2], outputs=outputs)
@@ -146,7 +153,7 @@ filepath = 'model-ep{epoch:03d}-loss{loss:.3f}-val_loss{val_loss:.3f}.h5'
 
 checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
 
-model.fit([x1, x2], y, epochs=20, verbose=2, callbacks=[checkpoint], validation_data=([x1test, x2test], ytest))
+model.fit([x1, x2], y, epochs=20, verbose=1, callbacks=[checkpoint], validation_data=([x1Test, x2Test], yTest))
 
 
 

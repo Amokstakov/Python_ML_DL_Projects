@@ -1,4 +1,5 @@
 import os 
+import sys
 import numpy as np
 import pickle 
 import tensorflow as tf 
@@ -38,6 +39,8 @@ def extract_features(directory):
 
 directory = '/home/sasha/Documents/Personal/Python/Python_ML_DL_Projects/data/photo_captioning/Flicker8k_Dataset'
 features = extract_features(directory)
+print(features)
+sys.exit()
 print(len(features))
 pickle.dump(features, open('features.pkl','wb'))
 
