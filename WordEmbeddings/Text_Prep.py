@@ -53,7 +53,14 @@ def save_description(mapping, output):
     data = '\n'.join(lines)
     file = open(output, 'w')
     file.write(data)
-    file.clost()
+    file.close()
 
 filename = '/home/sasha/Documents/Personal/Python/Python_ML_DL_Projects/data/photo_captioning/FlickerText/Flickr8k.token.txt'
 text = load_token(filename)
+mapping = load_descriptions(text)
+clean_descriptions(mapping)
+vocab = to_vocab(mapping)
+print(len(vocab))
+
+#savefile
+save_description(mapping, 'mapping.txt')

@@ -118,6 +118,9 @@ train_descriptions = load_clean_descriptions('/home/sasha/Documents/Personal/Pyt
 
 train_features = load_photo_features('/home/sasha/Documents/Personal/Python/Python_ML_DL_Projects/WordEmbeddings/features.pkl',train)
 
+testy = pickle.load(open('/home/sasha/Documents/Personal/Python/Python_ML_DL_Projects/WordEmbeddings/features.pkl','rb'))
+print(testy)
+
 tokenizer = create_tokenizer(train_descriptions)
 
 vocab_size = len(tokenizer.word_index) + 1
